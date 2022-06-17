@@ -1,0 +1,10 @@
+{
+  "extends": ["next/core-web-vitals", "@wiisportsresorts/eslint-config"],
+  "rules": {
+    "import/extensions": "off",
+    "multiline-ternary": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-return": "off"
+  }
+}

@@ -1,0 +1,8 @@
+# official decks from the real game
+/data/decks/official
+
+# BIPS-0039 word lists (in /words anyway)
+/data/words
+
+# test decks file
+/deck/.decks.json
