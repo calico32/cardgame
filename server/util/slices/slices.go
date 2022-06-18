@@ -1,8 +1,13 @@
 package slices
 
+func copy[T any](slice []T) []T {
+	return append([]T(nil), slice...)
+}
+
 // Remove removes the first occurrence of the given item from the slice.
 // If the item is not found, the slice is unchanged.
 func Remove[T comparable](slice []T, item T) []T {
+	slice = copy(slice)
 	for i, v := range slice {
 		if v == item {
 			slice[i] = slice[len(slice)-1]
@@ -16,6 +21,7 @@ func Remove[T comparable](slice []T, item T) []T {
 // RemoveAt removes the element at the given index from the slice.
 // If the index is out of bounds, RemoveAt panics.
 func RemoveAt[T comparable](slice []T, index int) []T {
+	slice = copy(slice)
 	slice[index] = slice[len(slice)-1]
 	return slice[:len(slice)-1]
 }
@@ -99,6 +105,7 @@ func Min[T numeric](slice []T) T {
 }
 
 // Sum returns the sum of all elements in the slice.
+// If the slice is empty, Sum returns T(0).
 func Sum[T numeric](slice []T) T {
 	var sum T
 	for _, v := range slice {
@@ -108,6 +115,7 @@ func Sum[T numeric](slice []T) T {
 }
 
 // Average returns the average of all elements in the slice.
+// If the slice is empty, Average panics.
 func Average[T numeric](slice []T) T {
 	return Sum(slice) / T(len(slice))
 }
@@ -115,37 +123,49 @@ func Average[T numeric](slice []T) T {
 // Unique returns a new slice containing the unique elements of the original slice.
 // Only the first occurrence of each unique element is kept.
 func Unique[T comparable](slice []T) []T {
-	var have map[T]struct{}
+	i := 0
+	have := make(map[T]int)
 	for _, v := range slice {
-		have[v] = struct{}{}
+		if _, ok := have[v]; !ok {
+			have[v] = i
+			i++
+		}
 	}
-	var result []T
+	result := make([]T, i)
 	for k := range have {
-		result = append(result, k)
+		result[have[k]] = k
 	}
 	return result
+}
+
+type uniquePair struct {
+	index int
+	value any
 }
 
 // UniqueBy returns a new slice containing the unique elements of the original slice,
 // where the uniqueness is determined by the return value of a function applied to each element.
 // Only the first occurrence of each unique element is kept.
 func UniqueBy[T any, U comparable](slice []T, f func(T) U) []T {
-	var have map[U]T
+	i := 0
+
+	have := make(map[U]uniquePair)
 	for _, v := range slice {
 		unique := f(v)
 		if _, ok := have[unique]; !ok {
-			have[unique] = v
+			have[unique] = uniquePair{i, v}
+			i++
 		}
 	}
-	var result []T
-	for _, v := range have {
-		result = append(result, v)
+	result := make([]T, i)
+	for _, p := range have {
+		result[p.index] = p.value.(T)
 	}
 	return result
 }
 
 // Reduce returns the result of applying a function to each element of the slice and accumulating the result.
-func Reduce[T any, U any](slice []T, f func(U, T) U, initial U) U {
+func Reduce[T any, U any](slice []T, initial U, f func(U, T) U) U {
 	result := initial
 	for _, v := range slice {
 		result = f(result, v)
@@ -154,6 +174,7 @@ func Reduce[T any, U any](slice []T, f func(U, T) U, initial U) U {
 }
 
 // Some returns true if any element of the slice satisfies the predicate.
+// If the slice is empty, Some returns false.
 func Some[T comparable](slice []T, f func(T) bool) bool {
 	for _, v := range slice {
 		if f(v) {
@@ -164,6 +185,7 @@ func Some[T comparable](slice []T, f func(T) bool) bool {
 }
 
 // Every returns true if all elements of the slice satisfy the predicate.
+// If the slice is empty, Every returns true.
 func Every[T comparable](slice []T, f func(T) bool) bool {
 	for _, v := range slice {
 		if !f(v) {
@@ -218,9 +240,30 @@ func Intersperse[T any](values []T, separator T) []T {
 }
 
 // IntersperseBy separates elements of a slice with the result of a function and returns the result.
-// The function is given the original index of the element before it in the slice.
+// The function is given the element to be placed before it in the original slice.
 // If the slice is empty, IntersperseBy returns an empty slice.
-func IntersperseBy[T any](values []T, separatorGenerator func(int) T) []T {
+//    slice := []string{"first", "second", "third"}
+//    IntersperseBy(slice, func(s string) string { return "after " + s })
+//    	=> []string{"first", "after first", "second", "after second", "third"}
+func IntersperseBy[T any](values []T, separatorGenerator func(T) T) []T {
+	if len(values) == 0 {
+		return []T{}
+	}
+
+	result := []T{values[0]}
+	for i, v := range values[1:] {
+		result = append(result, separatorGenerator(values[i]), v)
+	}
+	return result
+}
+
+// IntersperseByIndex separates elements of a slice with the result of a function and returns the result.
+// The function is given the original index of the element before it in the slice.
+// If the slice is empty, IntersperseByIndex returns an empty slice.
+//    slice := []string{"first", "second", "third"}
+//    IntersperseByIndex(slice, func(i int) string { return "after " + strconv.Itoa(i) })
+//      => []string{"first", "after 0", "second", "after 1", "third"}
+func IntersperseByIndex[T any](values []T, separatorGenerator func(int) T) []T {
 	if len(values) == 0 {
 		return []T{}
 	}
