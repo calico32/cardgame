@@ -3,6 +3,7 @@ package deck
 import (
 	"cardgame/card"
 	"cardgame/util"
+	"cardgame/util/slices"
 	"fmt"
 	"os"
 	"strings"
@@ -20,12 +21,16 @@ type YamlDeck struct {
 
 // Deck represents a collection of cards and wild cards.
 type Deck struct {
-	Id          string          `json:"id"`
-	Name        string          `json:"name"`
-	Location    string          `json:"location"`
-	Description string          `json:"description"`
-	Cards       []card.Card     `json:"cards"`
-	WildCards   []card.WildCard `json:"wild_cards"`
+	Id          string           `json:"id"`
+	Name        string           `json:"name"`
+	Location    string           `json:"location"`
+	Description string           `json:"description"`
+	Cards       []*card.Card     `json:"cards"`
+	WildCards   []*card.WildCard `json:"wildCards"`
+}
+
+var ignoredDirs = []string{
+	".git",
 }
 
 var decks = make(map[string]*Deck)
@@ -44,6 +49,9 @@ func scanDecks(dir string, prefix string) {
 		}
 
 		if file.IsDir() {
+			if slices.Contains(ignoredDirs, name) {
+				continue
+			}
 			if strings.Contains(name, ".") {
 				fmt.Fprintf(os.Stderr, "[deck] Skipping directory %s because it contains a dot.\n", name)
 				continue
@@ -98,7 +106,7 @@ func scanDecks(dir string, prefix string) {
 			// deck id is based on the cards in the deck for caching purposes
 			// if new cards are added to the deck, the deck id will change
 			deck.Id = util.LongIdFrom("d", deck.Id+"-"+c.String())
-			deck.Cards = append(deck.Cards, c)
+			deck.Cards = append(deck.Cards, &c)
 		}
 
 		for _, cardString := range yamlDeck.WildCards {
@@ -108,7 +116,7 @@ func scanDecks(dir string, prefix string) {
 			}
 
 			deck.Id = util.LongIdFrom("d", deck.Id+"-"+w.String())
-			deck.WildCards = append(deck.WildCards, w)
+			deck.WildCards = append(deck.WildCards, &w)
 		}
 
 		decks[deck.Id] = deck

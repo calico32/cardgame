@@ -29,13 +29,32 @@ const (
 )
 
 type Player struct {
-	Id       string      `json:"id"`
-	Name     string      `json:"name"`
-	Score    int         `json:"score"`
-	Cards    []card.Card `json:"cards"`
+	Id       string       `json:"id"`
+	Avatar   AvatarConfig `json:"avatar"`
+	Name     string       `json:"name"`
+	Score    int          `json:"score"`
+	Hand     PlayerHand   `json:"cards"` // Player's hand, top is at the end
 	socket   *websocket.Conn
 	room     *Room
 	outbound chan ServerMessage // outgoing server messages
+}
+
+type PlayerHand []*card.Card
+
+// top returns the top card of the player's hand.
+func (h PlayerHand) top() *card.Card {
+	if len(h) == 0 {
+		return nil
+	}
+	return h[len(h)-1]
+}
+
+// tail returns all cards from the player's hand except the top card.
+func (h PlayerHand) tail() PlayerHand {
+	if len(h) == 0 {
+		return PlayerHand{}
+	}
+	return h[:len(h)-1]
 }
 
 type AvatarConfig struct {
@@ -112,6 +131,7 @@ func (p *Player) write() {
 			s.TagName = "json"
 			m := s.Map()
 			m["type"] = message.ServerType()
+			m["room"] = p.room
 
 			if err := json.NewEncoder(w).Encode(m); err != nil {
 				return
@@ -135,6 +155,7 @@ func NewPlayer(socket *websocket.Conn, r *Room) *Player {
 		Name:     strings.Join(words.Words(words.English, 2), " "),
 		socket:   socket,
 		room:     r,
+		Hand:     PlayerHand{},
 		outbound: make(chan ServerMessage),
 	}
 

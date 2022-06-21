@@ -5,24 +5,49 @@ import (
 	"strings"
 )
 
-// Card represents a card in the game. It has a type (star, lines, circle, etc.) and a category (mountain range, cell phone brand, etc.).
-type Card struct {
-	Id       string   `json:"id"`
-	Type     CardType `json:"type"`
-	Category string   `json:"category"`
-}
+type BaseCardType int
 
-// WildCard represents a wild card in the game. It has two types.
-type WildCard struct {
-	Id    string     `json:"id"`
-	Types []CardType `json:"types"` // sorted tuple of card types
-}
+const (
+	BaseCardTypeNormal BaseCardType = iota
+	BaseCardTypeWild
+)
 
-func (c *Card) String() string {
-	return fmt.Sprintf("%s|%s", c.Type, c.Category)
-}
-func (w *WildCard) String() string {
-	return fmt.Sprintf("%s|%s", w.Types[0], w.Types[1])
+type (
+	BaseCard interface{ BaseCardType() BaseCardType }
+
+	// Card represents a card in the game. It has a type (star, lines, circle, etc.) and a category (mountain range, cell phone brand, etc.).
+	Card struct {
+		Id       string   `json:"id"`
+		Type     CardType `json:"type"`
+		Category string   `json:"category"`
+	}
+
+	// WildCard represents a wild card in the game. It has two types.
+	WildCard struct {
+		Id    string     `json:"id"`
+		Types []CardType `json:"types"` // sorted tuple of card types
+	}
+)
+
+func (c *Card) BaseCardType() BaseCardType     { return BaseCardTypeNormal }
+func (w *WildCard) BaseCardType() BaseCardType { return BaseCardTypeWild }
+
+func (c *Card) String() string     { return fmt.Sprintf("%s|%s", c.Type, c.Category) }
+func (w *WildCard) String() string { return fmt.Sprintf("%s|%s", w.Types[0], w.Types[1]) }
+
+func (cardA *Card) CompatibleWith(cardB *Card, wildCard *WildCard) bool {
+	a := cardA.Type
+	b := cardB.Type
+
+	if a == b {
+		return true
+	}
+
+	if wildCard == nil {
+		return false
+	}
+
+	return (wildCard.Types[0] == a && wildCard.Types[1] == b) || (wildCard.Types[0] == b && wildCard.Types[1] == a)
 }
 
 // CardFromString creates a card from a string representation.
