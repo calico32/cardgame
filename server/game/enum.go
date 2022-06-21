@@ -8,6 +8,15 @@ const (
 	PlayModeHubOnly
 )
 
+var TSAllPlayModes = []struct {
+	Value  PlayMode
+	TSName string
+}{
+	{PlayModePlayersOnly, "PlayersOnly"},
+	{PlayModePlayersAndHub, "PlayersAndHub"},
+	{PlayModeHubOnly, "HubOnly"},
+}
+
 type GamePhase int
 
 const (
@@ -15,3 +24,12 @@ const (
 	GamePhasePlaying
 	GamePhaseEnd
 )
+
+var TSAllGamePhases = []struct {
+	Value  GamePhase
+	TSName string
+}{
+	{GamePhaseLobby, "Lobby"},
+	{GamePhasePlaying, "Playing"},
+	{GamePhaseEnd, "End"},
+}

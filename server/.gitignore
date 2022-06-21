@@ -6,3 +6,6 @@
 
 # test decks file
 /deck/.decks.json
+
+# ts backup files
+*.backup

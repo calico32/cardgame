@@ -1,5 +1,6 @@
 {
   "extends": ["next/core-web-vitals", "@wiisportsresorts/eslint-config"],
+  "ignorePatterns": ["./server/**", "./public/**", "./node_modules/**"],
   "rules": {
     "import/extensions": "off",
     "multiline-ternary": "off",

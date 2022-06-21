@@ -1,6 +1,8 @@
 package card
 
-import "cardgame/util/slices"
+import (
+	"cardgame/util/slices"
+)
 
 // CardType represents a card type, like four dots or circle.
 type CardType int
@@ -17,6 +19,21 @@ const (
 	numCardTypes int      = iota
 	Invalid      CardType = -1
 )
+
+var TSAllCardTypes = []struct {
+	Value  CardType
+	TSName string
+}{
+	{Lines, "Lines"},
+	{Waves, "Waves"},
+	{Square, "Square"},
+	{Dots, "Dots"},
+	{Hash, "Hash"},
+	{Circle, "Circle"},
+	{Plus, "Plus"},
+	{Star, "Star"},
+	{Invalid, "Invalid"},
+}
 
 var symbols = [...]string{
 	Lines:  "=",
