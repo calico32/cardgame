@@ -1,5 +1,7 @@
 package slices
 
+import "math/rand"
+
 func copy[T any](slice []T) []T {
 	return append([]T(nil), slice...)
 }
@@ -10,8 +12,7 @@ func Remove[T comparable](slice []T, item T) []T {
 	slice = copy(slice)
 	for i, v := range slice {
 		if v == item {
-			slice[i] = slice[len(slice)-1]
-			return slice[:len(slice)-1]
+			return append(slice[:i], slice[i+1:]...)
 		}
 	}
 
@@ -22,13 +23,12 @@ func Remove[T comparable](slice []T, item T) []T {
 // If the index is out of bounds, RemoveAt panics.
 func RemoveAt[T comparable](slice []T, index int) []T {
 	slice = copy(slice)
-	slice[index] = slice[len(slice)-1]
-	return slice[:len(slice)-1]
+	return append(slice[:index], slice[index+1:]...)
 }
 
 // Filter returns a new slice containing only the elements of the original slice that satisfy the predicate.
 // The original slice is not modified.
-func Filter[T comparable](slice []T, f func(T) bool) []T {
+func Filter[T any](slice []T, f func(T) bool) []T {
 	var result []T
 	for _, v := range slice {
 		if f(v) {
@@ -273,4 +273,12 @@ func IntersperseByIndex[T any](values []T, separatorGenerator func(int) T) []T {
 		result = append(result, separatorGenerator(i), v)
 	}
 	return result
+}
+
+// Shuffle shuffles the elements of a slice in-place using the Fisher-Yates shuffle.
+func Shuffle[T any](slice []T) {
+	for i := len(slice) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		slice[i], slice[j] = slice[j], slice[i]
+	}
 }

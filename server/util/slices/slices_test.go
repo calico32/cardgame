@@ -389,3 +389,14 @@ func TestIntersperseByIndex(t *testing.T) {
 		t.Errorf("IntersperseBy(%v, %v) = %v, want %v", slice, "i", interspersed, []int{})
 	}
 }
+
+func TestShuffle(t *testing.T) {
+	slice := []int{1, 2, 3, 4, 5}
+
+	shuffled := copy(slice)
+	Shuffle(shuffled)
+
+	if !fuzzyEquals(t, shuffled, slice) {
+		t.Errorf("Shuffle(%v) = %v, want %v", slice, shuffled, slice)
+	}
+}
