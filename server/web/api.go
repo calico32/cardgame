@@ -15,6 +15,11 @@ func InitApi(e *gin.RouterGroup) *gin.RouterGroup {
 	e.GET("/decks", GetDecks)
 	e.GET("/deck/:id", GetDeck)
 
+	e.GET("/me", GetUser)
+	e.POST("/me", CreateUser)
+	e.PUT("/me", UpdateUser)
+	e.DELETE("/me", DeleteUser)
+
 	e.GET("", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"time": time.Now().Format(time.RFC3339),
