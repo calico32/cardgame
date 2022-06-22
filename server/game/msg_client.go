@@ -30,12 +30,12 @@ type (
 		PlayMode    *PlayMode `json:"playMode"`    // new play mode
 		HubDeviceId *string   `json:"hubDeviceId"` // ID of the hub device to use
 	}
-	// ClientJoin is sent by a new player joining the room.
+	// ClientJoin is sent to the hub by a new player joining a room.
 	ClientJoin struct {
 		Player *Player `json:"-"`
 
-		Name   string       `json:"name"`
-		Avatar AvatarConfig `json:"avatar"`
+		RoomId   string `json:"roomId"`
+		Password string `json:"password"`
 	}
 	// ClientLeave is sent by a player leaving the room.
 	ClientLeave struct {

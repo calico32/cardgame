@@ -52,7 +52,7 @@ func TestPublicRoom(t *testing.T) {
 	api := initTestApi(t)
 	rm := makePublicRoom(t, api)
 
-	assert.Contains(t, game.Rooms, rm.Id, "should contain public room")
+	assert.Contains(t, game.HubMain.Rooms, rm.Id, "should contain public room")
 
 	type response struct {
 		Room  *game.Room `json:"room"`
@@ -66,7 +66,7 @@ func TestPublicRoom(t *testing.T) {
 	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &r))
 	assert.Equal(t, rm.Id, r.Room.Id, "should be able to get correct room")
 
-	delete(game.Rooms, rm.Id)
+	delete(game.HubMain.Rooms, rm.Id)
 }
 
 func TestRoomList(t *testing.T) {
@@ -86,8 +86,8 @@ func TestRoomList(t *testing.T) {
 	assert.Contains(t, r.Rooms, pubRoom, "should contain public room")
 	assert.NotContains(t, r.Rooms, privRoom, "should not contain private room")
 
-	delete(game.Rooms, pubRoom.Id)
-	delete(game.Rooms, privRoom.Id)
+	delete(game.HubMain.Rooms, pubRoom.Id)
+	delete(game.HubMain.Rooms, privRoom.Id)
 }
 
 func TestPrivateRoom(t *testing.T) {
@@ -95,7 +95,7 @@ func TestPrivateRoom(t *testing.T) {
 	password := "correct horse battery staple"
 	rm := makePrivateRoom(t, api, password)
 
-	assert.Contains(t, game.Rooms, rm.Id, "should contain private room")
+	assert.Contains(t, game.HubMain.Rooms, rm.Id, "should contain private room")
 
 	type response struct {
 		Error string     `json:"error"`
@@ -123,5 +123,5 @@ func TestPrivateRoom(t *testing.T) {
 	assert.Equal(t, 200, w.Code, "should be able to get private room with correct password")
 	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &r))
 
-	delete(game.Rooms, rm.Id)
+	delete(game.HubMain.Rooms, rm.Id)
 }

@@ -94,7 +94,14 @@ func (p *Player) read() {
 			return
 		}
 
-		p.room.inbound <- msg
+		if p.room == nil {
+			HubMain.inbound <- &hubMessage{
+				clientMessage: msg,
+				player:        p,
+			}
+		} else {
+			p.room.inbound <- msg
+		}
 	}
 }
 
@@ -149,12 +156,11 @@ func (p *Player) write() {
 	}
 }
 
-func NewPlayer(socket *websocket.Conn, r *Room) *Player {
+func NewPlayer(socket *websocket.Conn) *Player {
 	p := &Player{
 		Id:       util.IdFrom("p", socket.RemoteAddr().String()),
 		Name:     strings.Join(words.Words(words.English, 2), " "),
 		socket:   socket,
-		room:     r,
 		Hand:     PlayerHand{},
 		outbound: make(chan ServerMessage),
 	}

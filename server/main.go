@@ -17,10 +17,10 @@ func main() {
 	} else {
 		godotenv.Load()
 
-		room := game.NewRoom("")
-		delete(game.Rooms, room.Id)
+		room := game.HubMain.NewRoom("")
+		delete(game.HubMain.Rooms, room.Id)
 		room.Id = "r_debug"
-		game.Rooms[room.Id] = room
+		game.HubMain.Rooms[room.Id] = room
 	}
 
 	deck.InitDecks("./data/decks")

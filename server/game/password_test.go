@@ -22,5 +22,5 @@ func TestRoomPassword(t *testing.T) {
 	r := Room{}
 	password := "correct horse battery staple"
 	r.SetPassword(password)
-	assert.True(t, r.TryPassword(password), "room password check failed")
+	assert.True(t, r.CheckPassword(password), "room password check failed")
 }

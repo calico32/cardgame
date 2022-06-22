@@ -3,15 +3,9 @@ package game
 import (
 	"cardgame/card"
 	"cardgame/deck"
-	"cardgame/util"
 	"cardgame/util/slices"
-	"cardgame/words"
 	"fmt"
-	"strings"
-	"time"
 )
-
-var Rooms = make(map[string]*Room)
 
 // Room represents a game room.
 type Room struct {
@@ -35,31 +29,9 @@ type Room struct {
 	private      bool   // true if the room is private
 	passwordHash string // password hash for private rooms
 
+	hub      *Hub                // hub instance
 	inbound  chan ClientMessage  // incoming client messages
 	outbound chan *serverPayload // outgoing server messages
-}
-
-func NewRoom(password string) *Room {
-	id := util.IdFrom("r", time.Now().String())
-	r := Room{
-		Id:         id,
-		Name:       strings.Join(words.Words(words.English, 4), " "),
-		Timstamp:   time.Now().UnixMilli(),
-		Players:    []*Player{},
-		Decks:      []*deck.Deck{},
-		MaxPlayers: 4,
-		inbound:    make(chan ClientMessage),
-		outbound:   make(chan *serverPayload),
-	}
-	Rooms[r.Id] = &r
-	if password != "" {
-		r.SetPassword(password)
-	}
-
-	go r.read()
-	go r.write()
-
-	return &r
 }
 
 func (r *Room) getPlayer(id string) *Player {
@@ -147,9 +119,14 @@ func (r *Room) IsPrivate() bool {
 	return r.private
 }
 
-// TryPassword returns true if the password is correct.
-func (r *Room) TryPassword(password string) bool {
+// CheckPassword returns true if the password is correct.
+func (r *Room) CheckPassword(password string) bool {
 	return checkPassword(r.passwordHash, password)
+}
+
+// IsFull returns true if the room is full.
+func (r *Room) IsFull() bool {
+	return len(r.Players) >= r.MaxPlayers
 }
 
 // SetPassword sets the password and privacy of the room.

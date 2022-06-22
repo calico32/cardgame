@@ -52,8 +52,10 @@ func (r *Room) HandleJoin(message ClientJoin) {
 		}
 	}
 
-	p.Name = message.Name
-	p.Avatar = message.Avatar
+	if r.IsFull() {
+		p.outbound <- &ServerError{"Room is full"}
+		return
+	}
 
 	r.Players = append(r.Players, p)
 
