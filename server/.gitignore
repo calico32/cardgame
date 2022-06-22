@@ -9,3 +9,6 @@
 
 # ts backup files
 *.backup
+
+# built executable
+/cardgame-server

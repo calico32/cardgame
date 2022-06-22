@@ -5,15 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
+	"cardgame/build"
 	"cardgame/deck"
 	"cardgame/game"
 	"cardgame/web"
 )
 
-var mode string
-
 func main() {
-	if mode == "release" {
+	if build.Mode() == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
 		godotenv.Load()
